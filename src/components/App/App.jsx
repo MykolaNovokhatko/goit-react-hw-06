@@ -1,47 +1,26 @@
-import { useState, useEffect } from 'react';
+import React from 'react';
+import { Provider } from 'react-redux';
+import { PersistGate } from 'redux-persist/integration/react';
+import { store, persistor } from '../../redux/store';
 import ContactForm from '../ContactForm/ContactForm';
-import SearchBox from '../SearchBox/SearchBox';
 import ContactList from '../ContactList/ContactList';
-import initialContacts from '../contacts.json';
+import SearchBox from '../SearchBox/SearchBox';
 import css from './App.module.css';
-import { nanoid } from 'nanoid';
 
-export default function App() {
-  const [contacts, setContacts] = useState(() => {
-    const savedContacts = JSON.parse(localStorage.getItem('contacts'));
-    return savedContacts ? savedContacts : initialContacts;
-  });
-  const [searchTerm, setSearchTerm] = useState('');
-
-  useEffect(() => {
-    localStorage.setItem('contacts', JSON.stringify(contacts));
-  }, [contacts]);
-
-  const addContact = contact => {
-    const newContact = { ...contact, id: nanoid() };
-    setContacts(prevContacts => [...prevContacts, newContact]);
-  };
-
-  const deleteContact = contactId => {
-    setContacts(prevContacts => prevContacts.filter(contact => contact.id !== contactId));
-  };
-
-  const resetContacts = () => {
-    setContacts(initialContacts);
-    localStorage.setItem('contacts', JSON.stringify(initialContacts));
-  };
-
-  const filteredContacts = contacts.filter(contact =>
-    contact.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
+const App = () => {
   return (
-    <div className={css.appStyle}>
-      <h1 className={css.titleStyle}>Phonebook</h1>
-      <ContactForm addContact={addContact} />
-      <SearchBox setSearchTerm={setSearchTerm} />
-      <ContactList contacts={filteredContacts} deleteContact={deleteContact} />
-      <button onClick={resetContacts}>Reset Contacts</button>
-    </div>
+    <Provider store={store}>
+      <PersistGate loading={null} persistor={persistor}>
+        <div className={css.appStyle}>
+          <h1 className={css.titleStyle}>Phonebook</h1>
+          <ContactForm />
+          <h2 className={css.titleStyle}>Contacts</h2>
+          <SearchBox />
+          <ContactList />
+        </div>
+      </PersistGate>
+    </Provider>
   );
-}
+};
+
+export default App;
